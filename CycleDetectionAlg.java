@@ -98,6 +98,7 @@ public class CycleDetectionAlg {
         return list;
     }
 
+    //Floyd's Cycle Detection Algorithm
     public static int[] Floyd(CycleDetectionAlg head){
         Node tortoise = head.head;
         Node hare = head.head;
@@ -127,5 +128,37 @@ public class CycleDetectionAlg {
             }
         }
         return new int[]{-1,-1};
+    }
+
+    //Brent's Cycle Detection Algorithm
+    public static int[] Brent(CycleDetectionAlg head){
+        Node p1 = head.head;
+        Node p2 = head.next;
+        int[] ordered_pair = new int[2];
+        int length = 1;
+        int power = 1;
+        int k=0;
+        while (p1 != p2 && p2 != null){
+            if (length == power){
+                power = power*2; //move p2 in powers of 2
+                p1 = p2; //reset p1 to previous position of p2
+                length = 0; //reset length
+            }
+            p2 = p2.next;
+            length++;
+        }
+        p1 = head.head;
+        p2 = head.head;
+        for(int i=1; i<=length;i++){
+            p2=p2.next;
+        }
+        while(p1 != p2){
+            k++;
+            p1 = p1.next;
+            p2 = p2.next;
+        }
+        ordered_pair[0]=length;
+        ordered_pair[1]=k;
+        return ordered_pair;
     }
 }
