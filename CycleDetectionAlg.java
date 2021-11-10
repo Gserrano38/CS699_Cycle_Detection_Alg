@@ -1,7 +1,10 @@
+import java.lang.Math;
+import java.util.Arrays;
+import java.io.FileWriter;
+import java.io.IOException;  // Import the IOException class to handle errors
+public class CycleDetectionAlg { //CycleDetectionAlg subclass inherits the attributes and methods from Test class (superclass)
 
-public class CycleDetectionAlg extends Test{ //CycleDetectionAlg subclass inherits the attributes and methods from Test class (superclass)
-
-    public class Node implements IteratedFunction{ //create a node class with two attributes data and next
+    public class Node extends IteratedFunction{ //create a node class with two attributes data and next
         int data;
         Node next; //pointer to the next node
 
@@ -10,16 +13,19 @@ public class CycleDetectionAlg extends Test{ //CycleDetectionAlg subclass inheri
             this.next = null;
         }
 
-        public IteratedFunction next(){ //interface method
+        @Override
+        public IteratedFunction next() {
             return next;
         }
 
-        public boolean equivalent(IteratedFunction node){ //interface method
-            if(node instanceof Node && ((Node)node).data == data){
-                return true;
-            } else{
-                return false;
-            }
+        @Override
+        public boolean equivalent(IteratedFunction node) {
+            return this==node;
+        }
+
+        @Override
+        public int value() {
+            return data;
         }
     }
 
@@ -70,26 +76,6 @@ public class CycleDetectionAlg extends Test{ //CycleDetectionAlg subclass inheri
         System.out.println();    
     } 
 
-    public static void main(String[] args) {  
-        gatherData(100, 100);
-        gatherData(100, 150);
-        gatherData(100, 200);
-        gatherData(100, 250);
-        gatherData(100, 300);
-        System.out.println("---------------------------------------");
-        gatherData(100, 100);
-        gatherData(150, 100);
-        gatherData(200, 100);
-        gatherData(250, 100);
-        gatherData(300, 100);
-        System.out.println("---------------------------------------");
-        gatherData(50);
-        gatherData(100);
-        gatherData(150);
-        gatherData(200);
-        gatherData(250);
-    }    
-
     public static CycleDetectionAlg makeList(int l, int k){
         CycleDetectionAlg list = new CycleDetectionAlg();
         for (int i=0; i<= l; i++){
@@ -110,91 +96,41 @@ public class CycleDetectionAlg extends Test{ //CycleDetectionAlg subclass inheri
         }
         return list;
     }
-
-    //Floyd's Cycle Detection Algorithm
-    public static int[] Floyd1(CycleDetectionAlg head){
-        Node tortoise = head.head;
-        Node hare = head.head;
-        int lambda=1; //length of cycle
-        int mu=0; //index of the first element in cycle (i.e. tail of cycle)
-        int indicator = 0;
-        int[] ordered_pair = new int[3];
-        while (tortoise != null && hare != null && hare.next != null){ //phase one: find cycle
-            tortoise = tortoise.next;
-            indicator++;
-            hare = hare.next.next;
-            indicator++;
-            indicator++;
-            if(tortoise == hare){
-                tortoise = tortoise.next;
-                indicator++;
-                while(tortoise != hare){ //phase two: find lambda
-                    lambda++;
-                    tortoise = tortoise.next;
-                    indicator++;
-                }
-                tortoise = head.head;
-                indicator++;
-                while(tortoise != hare){ //phase three: find mu
-                    mu++;
-                    tortoise = tortoise.next;
-                    indicator++;
-                    hare=hare.next;
-                    indicator++;
-                    
-                }
-                ordered_pair[0]= mu;
-                ordered_pair[1]=lambda;
-                ordered_pair[2]=indicator;
-                return ordered_pair;
-            }
-        }
-        return new int[]{-1,-1, indicator};
+    public static void main(String[] args) { 
+    factor(10);
     }
 
-    
-
-    //Brent's Cycle Detection Algorithm
-    public static int[] Brent1(CycleDetectionAlg head){
-        int ind=0;
-        Node p1 = head.head;
-        Node p2 = head.head.next;
-        ind++;
-        int[] ordered_pair = new int[3];
-        int lambda = 1; //length of cycle 
-        int power = 1;
-        int mu=0;        //index of first element in cycle
-        while (p1 != p2 && p2 != null){ //phase one: find cycle and lambda
-            if (lambda == power){
-                power = power*2; 
-                p1 = p2; //reset p1 to previous position of p2
-                lambda = 0;
+    public static void factor(int N){
+        //right now our PollardRho implementation uses 2 as the starting value
+        //for every possible pair between 2-1024
+        //use Floyd
+        try{
+            FileWriter Write = new FileWriter("C:\\users\\gabes\\Desktop\\CS699_Cycle_Detection_Alg\\Data.txt");
+            int[] returning_array = new int[3];
+            int[] arr = new int[N];
+            int number = 2;
+            for(int i=0; i<arr.length; i++){
+                arr[i] = number;
+                number++;
             }
-            p2 = p2.next; //only hare moves
-            ind++;
-            lambda++;
-        }
-        if(p2 == null){
-            return new int[]{-1, -1, ind};
-        }
-        p1 = head.head; //prep for phase two
-        p2 = head.head;
-        ind++;
-        ind++;
-        for(int i=1; i<=lambda;i++){ 
-            p2=p2.next;
-            ind++;
-        }
-        while(p1 != p2){ //phase two: find mu
-            mu++;
-            p1 = p1.next;
-            ind++;
-            p2 = p2.next;
-            ind++;
-        }
-        ordered_pair[0]=mu;
-        ordered_pair[1]=lambda;
-        ordered_pair[2]=ind;
-        return ordered_pair;
+            for(int i=0; i<N; i++){
+                for(int j=0; j<N; j++){
+                    int a = arr[j];
+                    int b = arr[i];
+                    PollardRho function = new PollardRho(a, b);
+                    int[] pairs = IteratedFunction.Floyd(function);
+                    int f = PollardRho.getGCD(Math.abs(pairs[3]-pairs[4]), b);
+                    returning_array[0] = a;
+                    returning_array[1] = b;
+                    returning_array[2] = f;
+                    Write.write("a: " + a + " b: " + b + " factor: " + f + System.getProperty("line.separator"));
+                }
+            }
+            Write.close();
+            System.out.println("Successfully wrote to the file.");
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+          }
     }
 }
