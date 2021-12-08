@@ -1,34 +1,34 @@
 import java.lang.Math;
-public class PollardRho extends IteratedFunction{
-    private int a;
-    private int N;
+public class PollardRho extends Cycle_Detection_Algs{
+    private long a;
+    private long N;
 
-    public PollardRho(int a, int N){ 
+    public PollardRho(long a, long N){ 
         this.a = a;
         this.N = N;
     }
 
-    public IteratedFunction next(){ //interface method
-        int function =  (a*a)+1;
-        int mod =  function % N ;
+    public Cycle_Detection_Algs next(){ //interface method
+        long function =  (a*a)+1;
+        long mod =  function % N ;
         PollardRho x = new PollardRho(mod, N);
         return x;
     }
 
-    public boolean equivalent(IteratedFunction node){ //interface method
+    public boolean equivalent(Cycle_Detection_Algs node){ //interface method
         if (node instanceof PollardRho){
-            int x = ((PollardRho)node).value(); 
-            int y = Math.abs((a-x));
-            int z = getGCD(y, N);
+            long x = ((PollardRho)node).value(); 
+            long y = Math.abs((a-x));
+            long z = getGCD(y, N);
            return z > 1;
         } else {
             return false;
         }
     }
 
-    public static int getGCD(int a, int b){
+    public static long getGCD(long a, long b){
         while (b != 0){
-            int remainder = a % b;
+            long remainder = a % b;
             a = b;
             b = remainder;
         }
@@ -36,7 +36,19 @@ public class PollardRho extends IteratedFunction{
     }
 
     @Override
-    public int value() {
+    public long value() {
+        return a;
+    }
+
+    public long getN(){
+        return N;
+    }
+
+    public long getA(){
+        return a;
+    }
+    public long setA(long a){
+        this.a = a;
         return a;
     }
 }
